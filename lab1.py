@@ -1,3 +1,5 @@
+import statistics
+
 import requests
 from sqlalchemy import create_engine, Table, Column, String, Float, MetaData
 from sqlalchemy.sql import select
@@ -47,7 +49,13 @@ metadata.create_all(engine)
 c = engine.connect()
 
 provider = WeatherProvider('I3D60I88UB6KPSDAVGK38HNP5')
-c.execute(weather.insert(), provider.get_data('Volgograd,Russia', '2020-09-20', '2020-09-29'))
+c.execute(weather.insert(), provider.get_data('Volgograd,Russia', '2019-01-29', '2020-01-29'))
 
 for row in c.execute(select([weather])):
     print(row)
+
+print("Средняя годовая температура {0:0.3f} °C".format(
+    statistics.mean(
+        [statistics.mean([x[1], x[2]]) for x in c.execute(select([weather]))]
+    )
+))
